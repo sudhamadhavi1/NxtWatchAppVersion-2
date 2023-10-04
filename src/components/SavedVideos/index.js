@@ -20,6 +20,10 @@ const SavedVideos = () => (
       //  console.log('SavedVideos')
       // console.log(savedVideoList)
 
+      //    const filteredSavedList = savedVideoList.filter(
+      //      each => each.isSave === true,
+      //    )
+
       const displaySavedVideoList = () => (
         <div>
           <SavedVideoHeadingContainer
@@ -44,7 +48,7 @@ const SavedVideos = () => (
             alt="no saved videos"
           />
           <h1>No saved videos found</h1>
-          <p>Save your videos by clicking a button</p>
+          <p>You can save your videos while watching them</p>
         </div>
       )
 

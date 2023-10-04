@@ -45,6 +45,7 @@ export const ButtonIcon = styled.button`
   display: flex;
   align-items: center;
   padding: 2px;
+  width: 60px;
   background-color: transparent;
   border: solid 0px;
   font-weight: bold;

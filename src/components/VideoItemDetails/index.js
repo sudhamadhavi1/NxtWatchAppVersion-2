@@ -49,9 +49,18 @@ class VideoItemDetails extends Component {
       apiStatus: apiStatusConstants.inProgress,
     })
 
-    const {match} = this.props
+    const {match, savedVideoList} = this.props
+    console.log('In Video Item Details')
+    console.log(savedVideoList)
+    // console.log(match)
+
     const {params} = match
     const {id} = params
+    const checkIndex = savedVideoList.findIndex(each => each.id === id)
+    console.log(checkIndex)
+    if (checkIndex !== -1) {
+      this.setState({isSave: savedVideoList[checkIndex].isSave})
+    }
 
     const jwtToken = Cookies.get('jwt_token')
 
@@ -65,10 +74,11 @@ class VideoItemDetails extends Component {
     }
 
     const response = await fetch(apiUrl, options)
-    console.log(response)
+
     if (response.ok === true) {
       const fetchedData = await response.json()
-      console.log(fetchedData)
+      // console.log(fetchedData)
+
       const updatedData = {
         title: fetchedData.video_details.title,
         id: fetchedData.video_details.id,
@@ -81,7 +91,7 @@ class VideoItemDetails extends Component {
         publishedAt: fetchedData.video_details.published_at,
         description: fetchedData.video_details.description,
       }
-      console.log(updatedData)
+      // console.log(updatedData)
       this.setState({
         videoData: updatedData,
         apiStatus: apiStatusConstants.success,
@@ -127,53 +137,41 @@ class VideoItemDetails extends Component {
       }))
   }
 
+  onUpdateSave = () => {
+    const {isSave, videoData} = this.state
+    const {onSavedVideo} = this.props
+
+    const updateVideoData = {...videoData, isSave}
+    onSavedVideo(updateVideoData)
+  }
+
+  onClickSave = () => {
+    this.setState(prevState => ({isSave: !prevState.isSave}), this.onUpdateSave)
+  }
+
   render() {
-    const {isLike, isDisLike} = this.state
-    console.log('Like')
-    console.log(isLike)
-    console.log('DisLike')
-    console.log(isDisLike)
-    console.log('-----render done--------')
+    const {isLike, isDisLike, isSave, videoData} = this.state
+    console.log('IsSave in Video Details Render')
+    console.log(isSave)
 
     return (
       <WatchContext.Consumer>
         {value => {
-          const {isDarkTheme, onSavedVideo, savedVideoList} = value
-          // const savedVideoList=[...savedVideoList,videoData]
+          const {isDarkTheme} = value
 
-          const saveList = () => {
-            const {isSave} = this.state
-            console.log('SavedVideoList')
-            console.log(savedVideoList)
-            const {videoData} = this.state
-            const sendData = {...videoData, isSave}
+          const {
+            title,
+            videoUrl,
 
-            console.log('SaveList')
-            console.log(sendData)
+            channelName,
+            profileImageUrl,
+            subscriberCount,
+            viewCount,
+            publishedAt,
+            description,
+          } = videoData
 
-            onSavedVideo(sendData)
-          }
-
-          const onClickSave = () => {
-            this.setState(prevState => ({isSave: !prevState.isSave}), saveList)
-          }
-
-          //  onSavedVideo: () => {}
-
-          const renderVideoData = () => {
-            const {videoData, isSave} = this.state
-            const {
-              title,
-              videoUrl,
-
-              channelName,
-              profileImageUrl,
-              subscriberCount,
-              viewCount,
-              publishedAt,
-              description,
-            } = videoData
-
+          const renderVideoDataSuccess = () => {
             const date = new Date(publishedAt)
 
             const dateDifference = formatDistanceToNow(date)
@@ -181,17 +179,15 @@ class VideoItemDetails extends Component {
             const formattedDateDifference = dateDifference.split(' ')
 
             const strNewDate = formattedDateDifference.slice(1).join(' ')
+
             const saveText = isSave ? 'Saved' : 'Save'
 
             return (
               <>
-                <div className="responsive-container">
-                  <ReactPlayer
-                    url={videoUrl}
-                    controls
-                    height="50vh"
-                    width="70vw"
-                  />
+                <div className="video-container">
+                  <div className="responsive-container">
+                    <ReactPlayer url={videoUrl} controls />
+                  </div>
                 </div>
 
                 <Heading isDarkTheme={isDarkTheme}>{title}</Heading>
@@ -221,11 +217,11 @@ class VideoItemDetails extends Component {
 
                     <ButtonIcon
                       type="button"
-                      onClick={onClickSave}
+                      onClick={this.onClickSave}
                       isChange={isSave}
                     >
                       <MdPlaylistAdd />
-                      <p>{saveText}</p>
+                      {saveText}
                     </ButtonIcon>
                   </LikeDislikeSaveButtonsContainer>
                 </MenuContainer>
@@ -263,7 +259,7 @@ class VideoItemDetails extends Component {
             const {apiStatus} = this.state
             switch (apiStatus) {
               case apiStatusConstants.success:
-                return renderVideoData()
+                return renderVideoDataSuccess()
               case apiStatusConstants.failure:
                 return renderVideoFailureView()
               case apiStatusConstants.inProgress:

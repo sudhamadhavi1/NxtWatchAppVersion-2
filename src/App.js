@@ -22,29 +22,30 @@ class App extends Component {
     this.setState(prevState => ({isDarkTheme: !prevState.isDarkTheme}))
   }
 
-  onSavedVideo = saveData => {
+  onSavedVideo = videoData => {
+    console.log('IsSave Value in App.js')
+    console.log(videoData.isSave)
     const {savedVideoList} = this.state
-    // console.log('SaveVideoList-App')
-    const findIndexSaveItem = savedVideoList.findIndex(
-      each => each.id === saveData.id,
+    const indexVideoData = savedVideoList.findIndex(
+      each => each.id === videoData.id,
     )
-    // console.log(findIndexSaveItem)
-    let updatedOnlySave
-    if (findIndexSaveItem === -1) {
-      const updatedSavedData = [...savedVideoList, saveData]
-      updatedOnlySave = updatedSavedData.filter(each => each.isSave === true)
-    } else {
-      savedVideoList[findIndexSaveItem].isSave = saveData.isSave
-      updatedOnlySave = savedVideoList.filter(each => each.isSave === true)
+
+    if (indexVideoData === -1) {
+      const list = [...savedVideoList, videoData]
+      this.setState({savedVideoList: list})
+    } else if (videoData.isSave === false) {
+      const filteredList = savedVideoList.filter(
+        each => each.id !== videoData.id,
+      )
+
+      this.setState({savedVideoList: filteredList})
     }
-
-    // console.log('---------App-Data- Save-------------')
-
-    this.setState({savedVideoList: updatedOnlySave})
   }
 
   render() {
     const {isDarkTheme, savedVideoList} = this.state
+    console.log('Saved-----list')
+    console.log(savedVideoList)
 
     return (
       <WatchContext.Provider
@@ -59,10 +60,17 @@ class App extends Component {
           <Route exact path="/login" component={Login} />
           <ProtectedRoute exact path="/" component={Home} />
           <ProtectedRoute exact path="/gaming" component={Gaming} />
+
           <ProtectedRoute
             exact
             path="/videos/:id"
-            component={VideoItemDetails}
+            component={routeProps => (
+              <VideoItemDetails
+                {...routeProps}
+                savedVideoList={savedVideoList}
+                onSavedVideo={this.onSavedVideo}
+              />
+            )}
           />
           <ProtectedRoute exact path="/saved-videos" component={SavedVideos} />
           <ProtectedRoute exact path="/trending" component={Trending} />
