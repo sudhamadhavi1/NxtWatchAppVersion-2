@@ -43,7 +43,7 @@ const SideBar = () => (
               <li>
                 <LinkItem to="/saved-videos">
                   <SaveIcon />
-                  <Paragraph isDarkTheme={isDarkTheme}>Saved videos</Paragraph>
+                  Saved videos
                 </LinkItem>
               </li>
             </UnlistedItems>
